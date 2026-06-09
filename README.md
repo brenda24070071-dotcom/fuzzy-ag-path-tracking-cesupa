@@ -1,79 +1,67 @@
 # Controlador Fuzzy Mamdani + AG para Rastreamento de Trajetória
 
-Sistema de controle **Fuzzy Mamdani** que comanda o esterçamento de um robô
-autônomo (modelo cinemático *bicicleta*) para seguir trajetórias de referência,
-com **otimização das funções de pertinência por Algoritmo Genético (AG)**.
+Sistema de controle **Fuzzy Mamdani** que comanda o esterçamento de um robô autônomo (modelo cinemático *bicicleta*) para seguir trajetórias de referência, com **otimização das funções de pertinência por Algoritmo Genético (AG)**.
 
-Reprodução/adaptação de: Mancilla et al., *Optimal Fuzzy Controller Design for
-Autonomous Robot Path Tracking Using Population-Based Metaheuristics*, Symmetry 2022, 14, 202.
+Trabalho prático que unifica as disciplinas de **Sistemas de Controle Fuzzy** e **IA Evolutiva e Computação Bioinspirada**.
+
+Reprodução/adaptação de: Mancilla et al., *Optimal Fuzzy Controller Design for Autonomous Robot Path Tracking Using Population-Based Metaheuristics*, Symmetry 2022, 14, 202.
 
 - **Disciplina:** Inteligência Artificial e Computacional (0700M8) — CESUPA
 - **Modalidade:** Opção A (artigo científico) com extensão de otimização (AG)
-- **Modelo de inferência:** Mamdani (E=min, agregação=max, defuzzificação=centroide)
+- **Modelo de inferência:** Mamdani (Max-Min, defuzzificação=centroide)
 
-## Modelo fuzzy (resumo)
+## Modelo Fuzzy (Resumo)
 
 | Item | Valor |
 |---|---|
-| Entradas | `e` = erro lateral (m); `theta_e` = erro angular |
-| Saída | `omega` = taxa de guinada (rad/s), universo `[-2, 2]` |
+| Entradas | `e_lat` = erro lateral (m); `theta_e` = erro angular (rad) |
+| Saída | `omega` = taxa de guinada/esterçamento (rad/s) |
 | Termos linguísticos | 5 por variável: AN, MN, Z, MP, AP |
-| Regras | 25 (matriz 5×5) — ver [docs/base_de_regras.md](docs/base_de_regras.md) |
-| Otimização | AG (10 genes = parâmetros das MFs de entrada), 5 execuções |
+| Regras | 25 (matriz 5×5) — justificada em [docs/base_de_regras.md](docs/base_de_regras.md) |
+| Otimização | AG (10 genes = parâmetros das MFs de entrada), avaliado por minimização de RMSE ao longo de 3 pistas (M, A, S). |
 
-**Convenção de sinais (realimentação negativa):** `e>0` = veículo à direita da
-rota → `omega>0` = esterça à esquerda (corretivo). Aplicada em
-`FastFuzzyController.control()`.
+## Instalação e Requisitos
 
-## Instalação
+Instale as dependências via gerenciador de pacotes:
 
 ```bash
-pip install -r requirements.txt
+pip install numpy scipy matplotlib scikit-fuzzy
 ```
 
-Dependências: `numpy`, `scipy`, `matplotlib`, `scikit-fuzzy` (+ `networkx`).
-Testado com **Python 3.13**.
+*(O projeto foi testado em Python 3.10+)*.
 
-## Execução (um comando)
+## Execução
+
+Toda a lógica e pipeline (Motor Mamdani rápido em NumPy, simulador cinemático, Algoritmo Genético de 5 execuções e avaliação via `skfuzzy` para os cenários pontuais e gráficos) está consolidada em um único script de fácil execução:
 
 ```bash
-python main.py            # pipeline completo: AG + todas as evidências (~1-2 min)
-python main.py --fast     # apenas evidências experimentais (sem re-treinar o AG)
+python fuzzy_path_tracking.py
 ```
 
-Notebook equivalente (importa a mesma lógica do módulo):
-
+Você também pode abrir o notebook interativo (que reflete o código exato do script) no Jupyter:
 ```bash
-python -m nbconvert --to notebook --execute --inplace fuzzy_path_tracking.ipynb
+jupyter notebook fuzzy_path_tracking.ipynb
 ```
 
-## Saídas geradas (`resultados/`)
+## Estrutura do Repositório (Essencial)
+
+```
+fuzzy_path_tracking.py     # Motor fuzzy otimizado (NumPy), AG e simulação
+fuzzy_path_tracking.ipynb  # Versão iterativa do código em Notebook
+docs/                      # Documentação teórica: Base de Regras, Trabalhos Relacionados e Plano
+resultados/                # Imagens geradas após a execução do código
+```
+
+## Saídas Geradas (`resultados/`)
+
+As seguintes evidências e análises visuais serão extraídas automaticamente ao rodar a simulação:
 
 | Arquivo | Conteúdo |
 |---|---|
-| `baseline_trajectories.png` / `optimized_trajectories.png` | Trajetórias seguidas nas 3 pistas |
-| `ag_convergence.png` | Curvas de convergência do AG (5 execuções) |
-| `funcoes_pertinencia.png` / `mfs_otimizadas.png` | Funções de pertinência |
-| `superficie_controle.png` | Superfície de controle `omega = f(e, theta_e)` |
-| `test_scenarios.csv` | 8 cenários: entradas, `omega`, classificação, coerência |
-| `analise_experimentos.md` | Análise automática de coerência + RMSE em malha fechada |
-| `best_params.npy` | Melhores parâmetros encontrados pelo AG |
+| `baseline_trajectories.png` | Trajetórias seguidas pelo robô usando parâmetros originais |
+| `optimized_trajectories.png` | Trajetórias seguidas pelo robô usando parâmetros evoluídos pelo AG |
+| `ag_convergence.png` | Curvas de convergência do AG (Sobreposição das 5 execuções independentes) |
+| `mfs_otimizadas.png` | Funções de pertinência antes e depois da otimização genética |
+| `superficie_controle.png` | Superfície de controle (Malha 3D de `omega = f(e_lat, theta_e)`) |
 
-## Estrutura dos arquivos
-
-```
-fuzzy_path_tracking.py   # motor fuzzy (Mamdani), simulação cinemática e AG
-experiments.py           # cenários de teste, CSV, análise de coerência, MD
-main.py                  # ponto de entrada único (AG + evidências)
-fuzzy_path_tracking.ipynb# notebook (importa do módulo; executado com saídas)
-requirements.txt
-docs/                    # base de regras, trabalhos relacionados, plano
-resultados/              # gráficos, tabelas e relatório gerados
-Pesquisa/                # PDFs das referências
-```
-
-## Resultados de referência
-
-RMSE lateral médio nas 3 pistas: **baseline ≈ 1,9 m → otimizado ≈ 1,5 m**
-(melhoria de ~20–25%). Todas as verificações automáticas de coerência passam
-(deadband, antissimetria, realimentação negativa, estabilidade em malha fechada).
+> A tabela com os 6 cenários de teste manuais exigidos na rubrica é impressa diretamente no console/terminal durante a execução.
