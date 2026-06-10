@@ -86,8 +86,8 @@ guiado por uma função de aptidão baseada em desempenho simulado, sem exigir g
 
 ## 3. Trabalhos Relacionados
 
-O levantamento bibliográfico completo — bases de busca, palavras-chave, critérios de
-inclusão/exclusão e tabela com 7 trabalhos — está em `docs/trabalhos_relacionados.md`.
+O levantamento bibliográfico completo, bases de busca, palavras-chave, critérios de
+inclusão/exclusão e tabela com 7 trabalhos, está em `docs/trabalhos_relacionados.md`.
 Em síntese: [1] é o artigo reproduzido; [2] estabelece o uso de erros geométricos
 (lateral/angular) como entradas-padrão de controladores fuzzy de path tracking; [3] e [4]
 fundamentam Mamdani e TSK; [5] enquadra a otimização evolutiva de sistemas fuzzy; [6]
