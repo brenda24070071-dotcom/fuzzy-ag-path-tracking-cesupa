@@ -2,8 +2,8 @@
 Comparacao experimental Mamdani x TSK (ordem zero) - Trilha de ampliacao
 para equipe de 5 integrantes (lauda Parte 1, Secao 6: "Comparacao de modelos").
 
-O controlador TSK reutiliza os MESMOS antecedentes (MFs de entrada) e a MESMA
-base de 25 regras do controlador Mamdani; a diferenca esta no consequente e na
+O controlador TSK reutiliza os MESMOS antecedentes (MFs de entrada) e a mesma
+base de 25 regras do controlador Mamdani. A diferenca esta no consequente e na
 saida:
   - Mamdani: consequentes fuzzy (AN..AP), implicacao/agregacao min-max e
     defuzzificacao por centroide do conjunto agregado;
