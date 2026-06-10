@@ -5,6 +5,17 @@
 > **Equipe:** `<PREENCHER: nomes completos dos integrantes>`
 > **Modalidade:** Opção A (artigo científico) — trilha **A1: Reprodução**, com extensão opcional de **otimização por Algoritmo Genético** (pontuação extra, opção 2)
 
+## 📁 Este repositório contém as duas partes do trabalho AV2
+
+| Parte | Tema | Onde está | Documento principal |
+|---|---|---|---|
+| **Parte 1** | Sistemas de Controle Fuzzy (Opção A — A1) | **Raiz** deste repositório (este README) | [docs/artigo.pdf](docs/artigo.pdf) |
+| **Parte 2** | IA Evolutiva e Computação Bioinspirada (Opção 1 — Pesquisa Científica): AG × PSO × Busca Aleatória | Pasta [`parte2-evolutiva/`](parte2-evolutiva/) (README próprio) | [parte2-evolutiva/docs/relatorio_tecnico.pdf](parte2-evolutiva/docs/relatorio_tecnico.pdf) |
+
+As duas partes compartilham o mesmo artigo-base (Mancilla et al., *Symmetry* 2022) e o mesmo
+núcleo de simulação: a Parte 1 foca a **modelagem fuzzy**; a Parte 2 foca o **experimento
+evolutivo** de otimização dos parâmetros. O restante deste README descreve a **Parte 1**.
+
 Sistema de controle **Fuzzy Mamdani** que comanda a guinada de um robô autônomo (modelo
 cinemático *bicicleta*) para seguir trajetórias de referência, com **otimização das funções
 de pertinência por Algoritmo Genético (AG)**.
@@ -83,6 +94,8 @@ resultados/
   ag_convergence.png                # Convergência das 5 execuções do AG
   mfs_otimizadas.png                # Funções de pertinência otimizadas
   superficie_controle.png           # Superfície de controle ω = f(e_lat, θe)
+parte2-evolutiva/                   # PARTE 2 do trabalho (IA Evolutiva): AG × PSO × Busca
+                                    # Aleatória — ver parte2-evolutiva/README.md
 ```
 
 ## Documento principal e declaração de IA

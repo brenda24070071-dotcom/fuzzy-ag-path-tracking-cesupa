@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>AG × PSO × Busca Aleatória — Otimização de Controlador Fuzzy</title>
+<style>
+  @page { size: 254mm 142.875mm; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1c2430; }
+  .slide { width: 254mm; height: 142.875mm; padding: 14mm 18mm; page-break-after: always;
+           position: relative; overflow: hidden; background: #ffffff; }
+  .slide.title { background: linear-gradient(135deg, #14321a 0%, #1d5c2a 60%, #2e8b46 100%);
+                 color: #fff; display: flex; flex-direction: column; justify-content: center; }
+  .slide.title h1 { font-size: 25pt; line-height: 1.25; margin-bottom: 10mm; border: none; color: #fff; }
+  .slide.title p { font-size: 13pt; margin-bottom: 3mm; color: #d9f0de; }
+  .slide.title .gh { font-size: 10.5pt; color: #a8d8b4; margin-top: 8mm; }
+  h2 { font-size: 19pt; color: #1d5c2a; border-bottom: 3px solid #2e8b46; padding-bottom: 2mm;
+       margin-bottom: 6mm; }
+  h3 { font-size: 12.5pt; color: #2e8b46; margin: 4mm 0 2mm; }
+  p, li { font-size: 11.5pt; line-height: 1.5; }
+  ul { margin-left: 7mm; margin-bottom: 3mm; }
+  li { margin-bottom: 1.5mm; }
+  table { border-collapse: collapse; width: 100%; font-size: 9.5pt; margin: 3mm 0; }
+  th, td { border: 1px solid #8fb89a; padding: 1.6mm 2.5mm; text-align: left; }
+  th { background: #1d5c2a; color: #fff; }
+  tr:nth-child(even) td { background: #eef8f0; }
+  .cols { display: flex; gap: 8mm; }
+  .col { flex: 1; }
+  img { max-width: 100%; max-height: 82mm; display: block; margin: 2mm auto; }
+  .foot { position: absolute; bottom: 6mm; left: 18mm; right: 18mm; font-size: 8.5pt;
+          color: #7a8aa0; display: flex; justify-content: space-between;
+          border-top: 1px solid #d5e6d9; padding-top: 1.5mm; }
+  .hl { background: #fff3cd; padding: 0 1mm; }
+  .big { font-size: 14pt; color: #1d5c2a; font-weight: 600; }
+  code { font-family: Consolas, monospace; font-size: 10pt; background: #eef8f0; padding: 0 1.5mm; }
+  .insight { border-left: 5px solid #b8860b; background: #fdf8ec; padding: 3mm 4mm; margin: 3mm 0; }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide title">
+  <h1>AG × PSO × Busca Aleatória na Otimização de um Controlador Fuzzy de Rastreamento de Trajetória</h1>
+  <p>Parte 2 — IA Evolutiva e Computação Bioinspirada · Opção 1: Pesquisa Científica</p>
+  <p>Replicação experimental de Mancilla et al., <i>Symmetry</i> 2022, 14, 202</p>
+  <p><b>Inteligência Artificial e Computacional (0700M8)</b> — CESUPA · Prof. Daniel Leal Souza</p>
+  <p>Turma: &lt;PREENCHER&gt; · Equipe: &lt;PREENCHER: integrantes&gt;</p>
+  <p class="gh">Repositório: github.com/brenda24070071-dotcom/fuzzy-ag-path-tracking-cesupa — Parte 2 na pasta parte2-evolutiva/ (Parte 1 na raiz)</p>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <h2>Contexto: artigo-base e objetivo</h2>
+  <p><b>Artigo-base (2022, indexado — dentro da janela de 7 anos):</b> Mancilla, García-Valdez, Castillo &amp;
+  Merelo-Guervós. <i>Optimal Fuzzy Controller Design for Autonomous Robot Path Tracking Using Population-Based
+  Metaheuristics</i>. Symmetry 14(2), 202. DOI 10.3390/sym14020202.</p>
+  <ul>
+    <li>Controladores fuzzy dependem da forma/posição das <b>funções de pertinência</b> — ajuste manual é caro e subótimo;</li>
+    <li>O artigo formula o ajuste como <b>otimização contínua</b> resolvida por <b>metaheurísticas populacionais</b>, avaliadas por simulação de rastreamento;</li>
+    <li><b>Nosso objetivo:</b> replicar o cerne do experimento — comparar <span class="hl">AG × PSO</span> — e acrescentar o baseline metodológico de <span class="hl">Busca Aleatória</span> com o mesmo orçamento;</li>
+    <li><b>Continuidade:</b> a modelagem fuzzy (25 regras, MFs, inferência Mamdani) foi reproduzida e validada na Parte 1 deste trabalho; aqui o foco é o <b>experimento evolutivo</b>.</li>
+  </ul>
+  <p><b>Justificativa da escolha:</b> metodologia clara e replicável; problema realista de robótica; une as duas partes da disciplina.</p>
+  <div class="foot"><span>AG × PSO × Busca Aleatória — CESUPA 0700M8</span><span>2</span></div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <h2>Formulação como problema de busca/otimização</h2>
+  <table>
+    <tr><th>Elemento</th><th>Definição</th></tr>
+    <tr><td>Variáveis de decisão</td><td><code>p ∈ [0,1]^10</code> — larguras, centros e rampas das MFs das 2 entradas do controlador (5 parâmetros por variável)</td></tr>
+    <tr><td>Espaço de busca</td><td>Hipercubo contínuo [0,1]<sup>10</sup> (parâmetros normalizados)</td></tr>
+    <tr><td>Função objetivo</td><td>RMSE médio do erro lateral em 3 pistas (M, A, S) — <b>minimização</b></td></tr>
+    <tr><td>Restrições</td><td>Caixa [0,1]<sup>10</sup> imposta por <i>clip</i> nos três métodos</td></tr>
+    <tr><td>Factibilidade</td><td>Penalidade <b>+2000</b> se o robô não completa a pista; <b>5000</b> se a inferência falha</td></tr>
+    <tr><td>Métricas</td><td>Melhor / pior / média / desvio-padrão (5 sementes); convergência por avaliação; tempo; nº de avaliações</td></tr>
+  </table>
+  <p><b>Avaliação de um candidato:</b> constrói o controlador Mamdani com os 10 parâmetros → simula o robô
+  (cinemática de bicicleta, Euler 0,1 s) nas 3 pistas → RMSE médio do erro lateral.</p>
+  <div class="foot"><span>AG × PSO × Busca Aleatória — CESUPA 0700M8</span><span>3</span></div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <h2>Algoritmos: AG real-coded</h2>
+  <div class="cols">
+    <div class="col">
+      <table>
+        <tr><th>Componente</th><th>Escolha</th></tr>
+        <tr><td>Representação</td><td>vetor real, 10 genes em [0,1]</td></tr>
+        <tr><td>População</td><td>20 (inicialização uniforme)</td></tr>
+        <tr><td>Seleção</td><td>torneio de 3</td></tr>
+        <tr><td>Cruzamento</td><td>aritmético por gene, taxa 0,7</td></tr>
+        <tr><td>Mutação</td><td>gaussiana σ=0,2, taxa 0,3/gene</td></tr>
+        <tr><td>Elitismo</td><td>2 melhores preservados</td></tr>
+        <tr><td>Parada</td><td>10 gerações = 220 avaliações</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <ul>
+        <li>É <b>o mesmo AG da Parte 1</b> (mesmo código e parâmetros);</li>
+        <li>Verificação cruzada: com as mesmas sementes, reproduz aqui <b>exatamente</b> os mesmos resultados finais da Parte 1 (ex.: semente 44 → 1,2319 m);</li>
+        <li>Mutação gaussiana + elitismo mantêm <b>diversidade com proteção do melhor</b> — relevante na análise dos resultados.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>AG × PSO × Busca Aleatória — CESUPA 0700M8</span><span>4</span></div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <h2>Algoritmos: PSO canônico e baseline aleatório</h2>
+  <div class="cols">
+    <div class="col">
+      <h3>PSO (global best)</h3>
+      <p style="font-size:10.5pt"><code>v ← w·v + c1·r1·(pbest−x) + c2·r2·(gbest−x)</code><br>
+      <code>x ← clip(x + v, 0, 1)</code></p>
+      <table>
+        <tr><th>Componente</th><th>Escolha</th></tr>
+        <tr><td>Enxame</td><td>20 partículas</td></tr>
+        <tr><td>Coeficientes</td><td>w=0,7298; c1=c2=1,49618 (constrição de Clerc–Kennedy)</td></tr>
+        <tr><td>Limites</td><td>|v| ≤ 0,5; posição em [0,1]</td></tr>
+        <tr><td>Parada</td><td>10 iterações = 220 avaliações</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <h3>Busca Aleatória (baseline)</h3>
+      <ul>
+        <li>220 amostras i.i.d. uniformes em [0,1]<sup>10</sup>, guardando a melhor;</li>
+        <li><b>Mesmo orçamento</b> dos demais métodos;</li>
+        <li>Papel metodológico: qualquer vantagem das metaheurísticas deve aparecer <b>acima desse piso</b> — sem ele, é fácil superestimar o mérito dos métodos.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>AG × PSO × Busca Aleatória — CESUPA 0700M8</span><span>5</span></div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <h2>Protocolo experimental</h2>
+  <ul>
+    <li><b>5 execuções independentes por método</b>, sementes fixas <b>42–46</b> (lauda: ≥5 para métodos estocásticos) → resultados <b>exatamente reproduzíveis</b>;</li>
+    <li><b>Orçamento idêntico:</b> 220 avaliações da função objetivo por execução, contadas por um invólucro (<code>AvaliadorFitness</code>) que registra a curva de melhor-até-agora <b>por avaliação</b> — comparação justa por custo, não por "geração";</li>
+    <li><b>Mesma função objetivo</b> (determinística dada a semente) e mesmas 3 pistas para todos;</li>
+    <li><b>Referência fixa (antes):</b> genes = 0,5 → RMSE = <b>1,5601 m</b>;</li>
+    <li><b>Ambiente:</b> Python 3.14, NumPy 2.4.6, SciPy 1.17.1; tempo total ≈ 1,3 min (15 execuções);</li>
+    <li><b>Evidências:</b> CSV por execução, JSON com melhores indivíduos, gráficos em <code>resultados/</code>.</li>
+  </ul>
+  <div class="foot"><span>AG × PSO × Busca Aleatória — CESUPA 0700M8</span><span>6</span></div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <h2>Resultados: tabela-resumo (RMSE em metros)</h2>
+  <table>
+    <tr><th>Método</th><th>Melhor</th><th>Pior</th><th>Média</th><th>Desv. padrão</th><th>Tempo médio</th><th>Avaliações</th></tr>
+    <tr><td><b>AG</b></td><td><b>1,2319</b></td><td>1,3193</td><td><b>1,2926</b></td><td>0,0354</td><td>6,0 s</td><td>220</td></tr>
+    <tr><td><b>PSO</b></td><td>1,2966</td><td>1,3349</td><td>1,3126</td><td><b>0,0156</b></td><td>5,9 s</td><td>220</td></tr>
+    <tr><td>Busca Aleatória</td><td>1,2866</td><td>1,3487</td><td>1,3208</td><td>0,0246</td><td>3,0 s</td><td>220</td></tr>
+    <tr><td>Referência fixa</td><td>1,5601</td><td>—</td><td>—</td><td>—</td><td>—</td><td>1</td></tr>
+  </table>
+  <ul>
+    <li>Todos os métodos melhoram <b>16–21%</b> sobre a referência fixa;</li>
+    <li><b>AG:</b> melhor média e melhor solução global (1,2319, semente 44);</li>
+    <li><b>PSO:</b> mais estável (menor desvio-padrão entre sementes);</li>
+    <li><b>Busca aleatória mais rápida por execução:</b> amostras ruins divergem/falham cedo e encerram a simulação antes — o custo é dominado pelos passos simulados, não pelos operadores.</li>
+  </ul>
+  <div class="foot"><span>AG × PSO × Busca Aleatória — CESUPA 0700M8</span><span>7</span></div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <h2>Curvas de convergência (por avaliação, 5 sementes)</h2>
+  <img src="../resultados/convergencia_metodos.png" alt="Convergência dos métodos">
+  <p style="font-size:10pt">Soluções factíveis surgem nas primeiras ~10 avaliações; o grosso do ganho até ~60; depois o
+  <b>AG segue melhorando</b> (mutação + elitismo), o <b>PSO estagna</b> (enxame converge ao gbest) e a busca aleatória depende de sorte decrescente.</p>
+  <div class="foot"><span>AG × PSO × Busca Aleatória — CESUPA 0700M8</span><span>8</span></div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <h2>Estabilidade e antes/depois (extra — Alternativa 3)</h2>
+  <div class="cols">
+    <div class="col">
+      <img src="../resultados/boxplot_metodos.png" alt="Boxplot dos métodos" style="max-height:62mm">
+      <p style="font-size:9.5pt; text-align:center; color:#667">PSO: menor variância. AG: cauda boa (único a atingir 1,2319).</p>
+    </div>
+    <div class="col">
+      <img src="../resultados/antes_depois_trajetorias.png" alt="Antes e depois" style="max-height:62mm">
+      <p style="font-size:9.5pt; text-align:center; color:#667">Otimização automática de parâmetros fuzzy:
+      <b>1,5601 → 1,2319 m (−21,0%)</b>, menos sobressinal nas curvas.</p>
+    </div>
+  </div>
+  <div class="foot"><span>AG × PSO × Busca Aleatória — CESUPA 0700M8</span><span>9</span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <h2>Análise crítica</h2>
+  <div class="insight">
+    <p><b>Achado mais interessante (e honesto):</b> a busca aleatória ficou a ~2% da média do AG.
+    Causas: orçamento pequeno (220 avaliações), paisagem benigna na região central da parametrização
+    e dimensionalidade moderada (10-D). A vantagem das metaheurísticas aparece na <b>cauda da qualidade</b>:
+    nenhuma execução aleatória alcançou o 1,2319 do AG.</p>
+  </div>
+  <ul>
+    <li><b>AG × PSO:</b> AG explora melhor (diversidade por mutação + elitismo); PSO explota rápido e estagna em 10 iterações — com orçamento maior, a hipótese é que o PSO recupere terreno;</li>
+    <li><b>Comparação com o artigo-base:</b> replicamos a <b>tendência</b> (metaheurísticas populacionais ajustam MFs com ganho consistente); não comparamos RMSE absoluto — orçamentos e detalhes de implementação diferem (causas de divergência declaradas no relatório);</li>
+    <li><b>Limitações:</b> 5 sementes (estatística descritiva, sem teste de hipótese), 3 métodos, orçamento deliberadamente pequeno para viabilizar 15 execuções no escopo da disciplina.</li>
+  </ul>
+  <div class="foot"><span>AG × PSO × Busca Aleatória — CESUPA 0700M8</span><span>10</span></div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <h2>Conclusão, IA e referências</h2>
+  <ul>
+    <li>Protocolo controlado (orçamento idêntico, 5 sementes, baseline) comparando AG, PSO e busca aleatória no ajuste de MFs fuzzy;</li>
+    <li><b>AG:</b> melhor média (1,2926 m) e melhor global (<span class="big">1,2319 m, −21,0%</span>); <b>PSO:</b> mais estável; <b>baseline</b> revelou o papel do orçamento e da paisagem — principal aprendizado científico;</li>
+    <li>Trabalhos futuros: orçamentos maiores, teste de Wilcoxon com mais sementes, DE e variantes de PSO, co-otimização das MFs de saída.</li>
+  </ul>
+  <h3>Uso de IA (declarado)</h3>
+  <p style="font-size:10.5pt">Claude Code (Anthropic): implementação do script experimental (núcleo reaproveitado da Parte 1),
+  rascunhos de documentação e revisão de coerência. Tudo revisado, executado e validado pela equipe — <code>docs/declaracao_uso_ia.md</code>.</p>
+  <h3>Referências principais</h3>
+  <p style="font-size:9.5pt">[1] Mancilla et al., Symmetry 14(2):202, 2022 · [2] Holland, 1975 · [3] Kennedy &amp; Eberhart, ICNN 1995 ·
+  [4] Clerc &amp; Kennedy, IEEE TEC 6(1), 2002 · [5] Cordón et al., Genetic Fuzzy Systems, 2001 · [6] Bergstra &amp; Bengio, JMLR 13, 2012 · [7] Mamdani &amp; Assilian, IJMMS 7(1), 1975</p>
+  <p style="margin-top:4mm"><b>Obrigado!</b></p>
+  <div class="foot"><span>AG × PSO × Busca Aleatória — CESUPA 0700M8</span><span>11</span></div>
+</section>
+
+</body>
+</html>
