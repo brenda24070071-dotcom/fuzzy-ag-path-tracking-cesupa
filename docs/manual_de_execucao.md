@@ -51,6 +51,15 @@ O script executa, nesta ordem:
 A tabela dos 6 cenários de teste é impressa no terminal (e está documentada em
 `docs/cenarios_de_teste.md`).
 
+## 3.1 Trilha de ampliação: comparação Mamdani × TSK (~5 s)
+
+```bash
+python comparacao_mamdani_tsk.py
+```
+
+Imprime as tabelas comparativas (RMSE por pista nas duas configurações de parâmetros e os
+6 cenários pontuais) e gera `resultados/comparacao_mamdani_tsk.png`.
+
 ## 4. Execução via notebook
 
 ```bash

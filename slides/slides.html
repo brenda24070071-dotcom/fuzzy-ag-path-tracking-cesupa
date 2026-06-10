@@ -46,7 +46,7 @@
   <p>Reprodução (A1) de Mancilla et al., <i>Symmetry</i> 2022, 14, 202 — com extensão de otimização por AG</p>
   <p><b>Inteligência Artificial e Computacional (0700M8)</b> — CESUPA · Prof. Daniel Leal Souza</p>
   <p>Turma: CC5MA · Equipe (5 integrantes): Brenda Nascimento, Cauê Jadão, Augusto Pereira, Fernando Mourão, César Ribeiro</p>
-  <p style="font-size:10.5pt">Trilha de ampliação (equipe de 5): Comparação de modelos — MFs baseline × otimizadas pelo AG</p>
+  <p style="font-size:10.5pt">Trilha de ampliação (equipe de 5): Comparação de modelos — Mamdani × TSK experimental (+ baseline × otimizado)</p>
   <p class="gh">github.com/brenda24070071-dotcom/fuzzy-ag-path-tracking-cesupa</p>
 </section>
 
@@ -285,10 +285,12 @@
       </ul>
     </div>
     <div class="col">
-      <h3>Mamdani × TSK (conceitual)</h3>
+      <h3>Mamdani × TSK (experimental — trilha de ampliação)</h3>
       <ul>
-        <li><b>TSK</b>: saída mais suave e contínua, ajuste mais fácil (consequentes lineares), menor custo;</li>
-        <li><b>Mamdani</b>: saída também linguística → base auditável — adequado a um trabalho de reprodução interpretável;</li>
+        <li>TSK ordem zero: mesmas regras, consequentes constantes, média ponderada;</li>
+        <li>Baseline: <b>TSK melhor</b> (1,43 × 1,56 m) — saída mais suave;</li>
+        <li>Parâmetros otimizados p/ Mamdani: TSK <b>falha a chegada na pista A</b> → o ajuste do AG é específico do motor (co-adaptação);</li>
+        <li><b>Mamdani</b>: saída linguística → base auditável.</li>
       </ul>
       <h3>Melhorias futuras</h3>
       <ul>

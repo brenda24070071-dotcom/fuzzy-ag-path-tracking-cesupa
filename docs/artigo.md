@@ -263,11 +263,14 @@ correções (espelhar as colunas da matriz e detectar a chegada) elevaram a melh
 a validação por simulação de malha fechada é indispensável — cenários pontuais isolados não
 revelavam o problema.
 
-**Mamdani × TSK.** Um TSK com consequentes afins (ω = a₀ + a₁·e_lat + a₂·θ_e por regra)
-produziria saída mais suave (sem o "platô" do centroide saturado em ±17,3) e seria mais
-fácil de otimizar (consequentes lineares); em troca, perderia a leitura linguística da
-saída ("guinada Alta Positiva") que facilita a auditoria da base de regras. Para um
-trabalho de reprodução interpretável, Mamdani foi a escolha adequada.
+**Mamdani × TSK.** A comparação foi feita **experimentalmente** (ver seção "Equipe de 5
+integrantes"): um TSK de ordem zero com os mesmos antecedentes e regras superou o Mamdani
+com parâmetros baseline (1,43 × 1,56 m — saída mais suave e contínua), mas falhou na pista A
+ao receber os parâmetros otimizados *para o Mamdani* — evidência de co-adaptação entre
+parâmetros e motor de inferência. Um TSK com consequentes afins (ω = a₀ + a₁·e_lat + a₂·θ_e)
+e otimização própria seria ainda mais suave e fácil de ajustar; em troca, perde-se a leitura
+linguística da saída ("guinada Alta Positiva") que facilita a auditoria da base de regras.
+Para um trabalho de reprodução interpretável, Mamdani foi a escolha adequada.
 
 **Melhorias futuras.** Terceira entrada com curvatura local da pista (antecipação);
 velocidade variável comandada por segundo sistema fuzzy; otimização também das MFs de
@@ -286,17 +289,34 @@ sinal explícitas são essenciais em controle fuzzy.
 
 ## Equipe de 5 integrantes: trilha de ampliação e contribuições
 
-**Trilha escolhida: Comparação de modelos.** Conforme a Seção 6 da lauda, a equipe de 5
-integrantes cumpre a ampliação obrigatória comparando **duas versões do controlador com
-funções de pertinência distintas** — a configuração baseline (genes = 0,5) e a configuração
-otimizada pelo AG — e discutindo as diferenças de saída. As evidências estão integradas ao
-trabalho: tabela de cenários com as duas colunas de saída (Seção 7.1), RMSE por pista das
-duas versões (Seção 7.2, −21,0% na média), trajetórias lado a lado
-(`resultados/baseline_trajectories.png` × `resultados/optimized_trajectories.png`), gráficos
-das MFs nas duas configurações (`resultados/mfs_otimizadas.png`) e a leitura dos parâmetros
-alterados (Seção 8: zona morta angular alargada de 0,5 para 0,83; termos médios do erro
-lateral estreitados). A discussão das diferenças mostra **onde** a segunda configuração
-ganha (pista S, −42%) e **por quê** (menos oscilação de recaptura).
+**Trilha escolhida: Comparação de modelos — Mamdani × TSK (experimental).** Conforme a
+Seção 6 da lauda, a equipe de 5 integrantes implementou uma segunda versão do controlador
+com inferência **Takagi–Sugeno–Kang de ordem zero** (`comparacao_mamdani_tsk.py`): mesmos
+antecedentes e mesma base de 25 regras, mas consequentes **constantes** (o centroide de cada
+conjunto de saída: −17,28 / −0,5 / 0 / +0,5 / +17,28 rad/s) e saída por **média ponderada**
+ω = Σwᵣ·cᵣ / Σwᵣ, com peso wᵣ = min(μ_θ, μ_e) por regra. Resultados
+(`resultados/comparacao_mamdani_tsk.png`):
+
+| Parâmetros das MFs | RMSE médio Mamdani (m) | RMSE médio TSK (m) | Leitura |
+|---|---|---|---|
+| Baseline (genes = 0,5) | 1,5601 | **1,4335** | TSK melhor nas 3 pistas: a média ponderada gera saída mais suave e contínua que o centroide do conjunto agregado |
+| Otimizados pelo AG (para o Mamdani) | **1,2340*** | 668,16 (falha o critério de chegada na pista A: 2000 + 2,06 de RMSE bruto) | Os parâmetros evoluídos são **específicos do motor de inferência**: transplantados para o TSK, mantêm erro de rastreio similar mas o robô laça no fim da pista A e não conclui |
+
+\* 1,234 com os genes publicados (3 casas decimais); 1,2319 com precisão completa (Seção 7.2).
+
+**Discussão das diferenças de saída:** no caso de erro lateral puro (±5 m, alinhado), o TSK
+comanda ω = ±12,85 contra ±16,80 do Mamdani — saída menos saturada, pois a média ponderada
+dilui o consequente extremo com os termos vizinhos, enquanto no Mamdani o centroide do
+conjunto agregado é dominado pelo trapézio AN/AP. Isso explica os dois lados da tabela: a
+suavidade favorece o TSK com parâmetros genéricos (baseline), mas o AG, ao otimizar **para o
+Mamdani**, explorou exatamente o perfil de saturação desse motor — co-adaptação que não se
+transfere. Conclusão da trilha: a escolha do mecanismo de inferência e o ajuste de parâmetros
+**não são decisões independentes**; otimizar o TSK diretamente (consequentes incluídos) é a
+extensão natural (Seção 8).
+
+A comparação **baseline × otimizado** do controlador Mamdani (Seções 7.1–7.2, −21,0% de
+RMSE) complementa a trilha como segunda comparação de versões — duas configurações de
+funções de pertinência com diferenças de saída discutidas.
 
 **Contribuições dos integrantes** (todos revisaram o código e os documentos e estão
 preparados para a arguição):

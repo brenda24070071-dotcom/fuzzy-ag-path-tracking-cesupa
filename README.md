@@ -4,7 +4,7 @@
 > **Turma:** CC5MA
 > **Equipe (5 integrantes):** Brenda Nascimento, Cauê Jadão, Augusto Pereira, Fernando Mourão, César Ribeiro
 > **Modalidade:** Opção A (artigo científico) — trilha **A1: Reprodução**, com extensão opcional de **otimização por Algoritmo Genético** (pontuação extra, opção 2)
-> **Trilha de ampliação (equipe de 5):** **Comparação de modelos** — duas configurações de funções de pertinência (baseline × otimizada pelo AG), com diferenças de saída discutidas em cenários, trajetórias, RMSE por pista e gráficos de MFs (detalhes no [artigo](docs/artigo.md))
+> **Trilha de ampliação (equipe de 5):** **Comparação de modelos — Mamdani × TSK experimental** (`comparacao_mamdani_tsk.py`): mesma base de 25 regras com inferência TSK de ordem zero, diferenças de saída discutidas no [artigo](docs/artigo.md); complementada pela comparação baseline × otimizado
 
 ## 📁 Este repositório contém as duas partes do trabalho AV2
 
@@ -54,10 +54,11 @@ pip install -r requirements.txt
 ## Execução
 
 ```bash
-python fuzzy_path_tracking.py
+python fuzzy_path_tracking.py        # pipeline principal (baseline -> AG -> comparação)
+python comparacao_mamdani_tsk.py     # trilha de ampliação: Mamdani × TSK (~5 s)
 ```
 
-Executa o pipeline completo (~1–2 min): baseline → 5 execuções do AG → comparação final.
+O pipeline principal executa em ~1–2 min: baseline → 5 execuções do AG → comparação final.
 Imprime no terminal o RMSE por etapa e a tabela dos **6 cenários de teste**, e salva os
 gráficos em `resultados/`. Alternativa interativa (mesmo código, já executado e com saídas
 visíveis no GitHub):
@@ -77,6 +78,7 @@ interpretação e análise: [docs/cenarios_de_teste.md](docs/cenarios_de_teste.m
 
 ```
 fuzzy_path_tracking.py      # Código-fonte: motor Mamdani (NumPy), simulador, AG e gráficos
+comparacao_mamdani_tsk.py   # Trilha de ampliação (equipe de 5): Mamdani × TSK ordem zero
 fuzzy_path_tracking.ipynb   # Notebook executado (mesmo código, com narrativa e saídas)
 requirements.txt            # Dependências e versões validadas
 docs/
@@ -95,6 +97,7 @@ resultados/
   ag_convergence.png                # Convergência das 5 execuções do AG
   mfs_otimizadas.png                # Funções de pertinência otimizadas
   superficie_controle.png           # Superfície de controle ω = f(e_lat, θe)
+  comparacao_mamdani_tsk.png        # Trajetórias Mamdani × TSK (trilha de ampliação)
 parte2-evolutiva/                   # PARTE 2 do trabalho (IA Evolutiva): AG × PSO × Busca
                                     # Aleatória — ver parte2-evolutiva/README.md
 ```
