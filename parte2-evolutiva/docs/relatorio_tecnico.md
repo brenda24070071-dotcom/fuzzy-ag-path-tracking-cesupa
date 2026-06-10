@@ -2,9 +2,10 @@
 
 **Disciplina:** Inteligência Artificial e Computacional (0700M8) — CESUPA
 **Trabalho:** Parte 2 — IA Evolutiva e Computação Bioinspirada · **Opção 1: Pesquisa Científica**
-**Turma:** `<PREENCHER: CC5MA ou CC5NA>`
-**Equipe:** `<PREENCHER: nomes completos dos integrantes>`
-**Pontuação extra solicitada:** Alternativa 3 — Otimização automática de parâmetros Fuzzy (comparação antes/depois na Seção 6.4)
+**Turma:** CC5MA
+**Equipe (5 integrantes):** Brenda Nascimento, Cauê Jadão, Augusto Pereira, Fernando Mourão, César Ribeiro
+**Ampliação obrigatória (equipe de 5, Seção 5 da lauda):** **Comparação ampliada** — o trabalho compara duas abordagens distintas, AG × PSO (exemplo literal da lauda), estendidas com baseline de busca aleatória sob o mesmo orçamento
+**Pontuação extra solicitada:** Alternativa 3 — Otimização automática de parâmetros Fuzzy (comparação antes/depois na Seção 5.4)
 **Repositório GitHub:** <https://github.com/brenda24070071-dotcom/fuzzy-ag-path-tracking-cesupa> — Parte 2 na pasta `parte2-evolutiva/`; Parte 1 (modelagem fuzzy) na raiz
 
 ---
@@ -212,6 +213,18 @@ ganho vem da amostragem em si — análise crítica que consideramos o principal
 científico do trabalho. Trabalhos futuros: orçamentos maiores, mais sementes com teste
 estatístico (Wilcoxon), DE e variantes de PSO com reinicialização, e co-otimização das MFs
 de saída.
+
+## Contribuições dos integrantes
+
+Todos os integrantes revisaram o código e os documentos e estão preparados para a arguição.
+
+| Integrante | Contribuição principal nesta Parte 2 |
+|---|---|
+| Brenda Nascimento | Formulação do problema de otimização e gestão do repositório |
+| Cauê Jadão | Núcleo de simulação/fitness (compartilhado com a Parte 1) e validação das execuções |
+| Augusto Pereira | Implementação do AG e do PSO; protocolo experimental |
+| Fernando Mourão | Execução dos experimentos, métricas, gráficos e CSV de evidências |
+| César Ribeiro | Relatório técnico, análise crítica e slides |
 
 ## Declaração de uso de IA
 

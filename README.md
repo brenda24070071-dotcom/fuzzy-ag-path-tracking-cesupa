@@ -1,9 +1,10 @@
 # Controlador Fuzzy Mamdani + AG para Rastreamento de Trajetória
 
 > **Disciplina:** Inteligência Artificial e Computacional (0700M8) — CESUPA · Prof. Daniel Leal Souza
-> **Turma:** `<PREENCHER: CC5MA ou CC5NA>`
-> **Equipe:** `<PREENCHER: nomes completos dos integrantes>`
+> **Turma:** CC5MA
+> **Equipe (5 integrantes):** Brenda Nascimento, Cauê Jadão, Augusto Pereira, Fernando Mourão, César Ribeiro
 > **Modalidade:** Opção A (artigo científico) — trilha **A1: Reprodução**, com extensão opcional de **otimização por Algoritmo Genético** (pontuação extra, opção 2)
+> **Trilha de ampliação (equipe de 5):** **Comparação de modelos** — duas configurações de funções de pertinência (baseline × otimizada pelo AG), com diferenças de saída discutidas em cenários, trajetórias, RMSE por pista e gráficos de MFs (detalhes no [artigo](docs/artigo.md))
 
 ## 📁 Este repositório contém as duas partes do trabalho AV2
 

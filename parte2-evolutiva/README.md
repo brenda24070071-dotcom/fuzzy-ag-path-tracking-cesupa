@@ -2,8 +2,9 @@
 
 > **Disciplina:** Inteligência Artificial e Computacional (0700M8) — CESUPA · Prof. Daniel Leal Souza
 > **Trabalho:** Parte 2 — IA Evolutiva e Computação Bioinspirada · **Opção 1 (Pesquisa Científica)**
-> **Turma:** `<PREENCHER: CC5MA ou CC5NA>`
-> **Equipe:** `<PREENCHER: nomes completos dos integrantes>`
+> **Turma:** CC5MA
+> **Equipe (5 integrantes):** Brenda Nascimento, Cauê Jadão, Augusto Pereira, Fernando Mourão, César Ribeiro
+> **Ampliação obrigatória (equipe de 5):** **Comparação ampliada** — duas abordagens distintas comparadas (AG × PSO, exemplo literal da Seção 5 da lauda), estendida com baseline de busca aleatória
 > **Pontuação extra:** Alternativa 3 — Otimização automática de parâmetros Fuzzy (comparação antes/depois incluída)
 > **Localização:** pasta `parte2-evolutiva/` do repositório [fuzzy-ag-path-tracking-cesupa](https://github.com/brenda24070071-dotcom/fuzzy-ag-path-tracking-cesupa) — a Parte 1 está na raiz
 

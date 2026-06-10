@@ -1,9 +1,10 @@
 # Controle Fuzzy Mamdani Otimizado por Algoritmo Genético para Rastreamento de Trajetória de Robô Autônomo: uma Reprodução de Mancilla et al. (2022)
 
 **Disciplina:** Inteligência Artificial e Computacional (0700M8) — CESUPA
-**Turma:** `<PREENCHER: CC5MA ou CC5NA>`
-**Equipe:** `<PREENCHER: nomes completos dos integrantes>`
+**Turma:** CC5MA
+**Equipe (5 integrantes):** Brenda Nascimento, Cauê Jadão, Augusto Pereira, Fernando Mourão, César Ribeiro
 **Modalidade:** Opção A — Pesquisa em artigos científicos, trilha **A1 (Reprodução)**, com extensão opcional de otimização por **Algoritmo Genético (AG)** (pontuação extra, opção 2)
+**Trilha de ampliação obrigatória (equipe de 5):** **Comparação de modelos** — duas configurações de funções de pertinência comparadas (baseline × otimizada pelo AG); ver Seção "Equipe de 5 integrantes"
 **Repositório GitHub:** <https://github.com/brenda24070071-dotcom/fuzzy-ag-path-tracking-cesupa>
 
 ---
@@ -282,6 +283,31 @@ demonstra o ciclo completo exigido pela disciplina — modelagem fuzzy explícit
 justificada, implementação reprodutível, validação experimental com análise crítica — e
 ilustra, com um caso real documentado, por que validação de malha fechada e convenções de
 sinal explícitas são essenciais em controle fuzzy.
+
+## Equipe de 5 integrantes: trilha de ampliação e contribuições
+
+**Trilha escolhida: Comparação de modelos.** Conforme a Seção 6 da lauda, a equipe de 5
+integrantes cumpre a ampliação obrigatória comparando **duas versões do controlador com
+funções de pertinência distintas** — a configuração baseline (genes = 0,5) e a configuração
+otimizada pelo AG — e discutindo as diferenças de saída. As evidências estão integradas ao
+trabalho: tabela de cenários com as duas colunas de saída (Seção 7.1), RMSE por pista das
+duas versões (Seção 7.2, −21,0% na média), trajetórias lado a lado
+(`resultados/baseline_trajectories.png` × `resultados/optimized_trajectories.png`), gráficos
+das MFs nas duas configurações (`resultados/mfs_otimizadas.png`) e a leitura dos parâmetros
+alterados (Seção 8: zona morta angular alargada de 0,5 para 0,83; termos médios do erro
+lateral estreitados). A discussão das diferenças mostra **onde** a segunda configuração
+ganha (pista S, −42%) e **por quê** (menos oscilação de recaptura).
+
+**Contribuições dos integrantes** (todos revisaram o código e os documentos e estão
+preparados para a arguição):
+
+| Integrante | Contribuição principal |
+|---|---|
+| Brenda Nascimento | Modelagem fuzzy (variáveis, universos, MFs e base de regras) e gestão do repositório |
+| Cauê Jadão | Implementação do motor Mamdani e do simulador; depuração e validação das correções |
+| Augusto Pereira | Algoritmo genético (operadores, fitness) e experimentos de otimização |
+| Fernando Mourão | Cenários de teste, validação experimental e geração de gráficos/evidências |
+| César Ribeiro | Documentação técnica (artigo, manuais) e slides de apresentação |
 
 ## Declaração de Uso de IA
 
