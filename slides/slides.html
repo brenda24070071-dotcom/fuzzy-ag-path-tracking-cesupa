@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Controle Fuzzy Mamdani + AG — Rastreamento de Trajetória</title>
+<style>
+  @page { size: 254mm 142.875mm; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1c2430; }
+  .slide { width: 254mm; height: 142.875mm; padding: 14mm 18mm; page-break-after: always;
+           position: relative; overflow: hidden; background: #ffffff; }
+  .slide.title { background: linear-gradient(135deg, #0d2447 0%, #1a3a6b 60%, #2a5298 100%);
+                 color: #fff; display: flex; flex-direction: column; justify-content: center; }
+  .slide.title h1 { font-size: 26pt; line-height: 1.25; margin-bottom: 10mm; border: none; color: #fff; }
+  .slide.title p { font-size: 13pt; margin-bottom: 3mm; color: #d7e3f5; }
+  .slide.title .gh { font-size: 10.5pt; color: #9fc0ea; margin-top: 8mm; }
+  h2 { font-size: 19pt; color: #1a3a6b; border-bottom: 3px solid #2a5298; padding-bottom: 2mm;
+       margin-bottom: 6mm; }
+  h3 { font-size: 12.5pt; color: #2a5298; margin: 4mm 0 2mm; }
+  p, li { font-size: 11.5pt; line-height: 1.5; }
+  ul { margin-left: 7mm; margin-bottom: 3mm; }
+  li { margin-bottom: 1.5mm; }
+  table { border-collapse: collapse; width: 100%; font-size: 9.5pt; margin: 3mm 0; }
+  th, td { border: 1px solid #8fa3bd; padding: 1.6mm 2.5mm; text-align: left; }
+  th { background: #1a3a6b; color: #fff; }
+  tr:nth-child(even) td { background: #eef2f8; }
+  .cols { display: flex; gap: 8mm; }
+  .col { flex: 1; }
+  img { max-width: 100%; max-height: 80mm; display: block; margin: 2mm auto; }
+  .imgrow img { max-height: 70mm; }
+  .foot { position: absolute; bottom: 6mm; left: 18mm; right: 18mm; font-size: 8.5pt;
+          color: #7a8aa0; display: flex; justify-content: space-between;
+          border-top: 1px solid #d5dce6; padding-top: 1.5mm; }
+  .hl { background: #fff3cd; padding: 0 1mm; }
+  .big { font-size: 15pt; color: #1a6b2a; font-weight: 600; }
+  code { font-family: Consolas, monospace; font-size: 10pt; background: #eef2f8; padding: 0 1.5mm; }
+  .warn { border-left: 5px solid #c0392b; background: #fdf0ee; padding: 3mm 4mm; margin: 3mm 0; }
+  .ok { border-left: 5px solid #1a6b2a; background: #eefaf0; padding: 3mm 4mm; margin: 3mm 0; }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide title">
+  <h1>Controle Fuzzy Mamdani Otimizado por Algoritmo Genético para Rastreamento de Trajetória de Robô Autônomo</h1>
+  <p>Reprodução (A1) de Mancilla et al., <i>Symmetry</i> 2022, 14, 202 — com extensão de otimização por AG</p>
+  <p><b>Inteligência Artificial e Computacional (0700M8)</b> — CESUPA · Prof. Daniel Leal Souza</p>
+  <p>Turma: &lt;PREENCHER&gt; · Equipe: &lt;PREENCHER: integrantes&gt;</p>
+  <p class="gh">github.com/brenda24070071-dotcom/fuzzy-ag-path-tracking-cesupa</p>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <h2>O problema: rastreamento de trajetória</h2>
+  <div class="cols">
+    <div class="col">
+      <ul>
+        <li>Robô autônomo (cinemática de <b>bicicleta</b>, L = 2,5 m, v = 3,33 m/s) deve <b>seguir uma pista de referência</b> com o menor desvio possível;</li>
+        <li>Controlador decide a <b>taxa de guinada ω</b> a partir de dois erros medidos;</li>
+        <li>Aplicações: veículos autônomos, AGVs, máquinas agrícolas.</li>
+      </ul>
+      <h3>Por que lógica fuzzy?</h3>
+      <ul>
+        <li>Conhecimento de condução é <b>linguístico</b>: "um pouco à direita → vire de leve à esquerda";</li>
+        <li>Fronteiras entre situações são <b>graduais</b>, não nítidas;</li>
+        <li>Tolerância a imprecisão de modelo — sem exigir solução analítica exata.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>Variáveis do controlador</h3>
+      <table>
+        <tr><th>Variável</th><th>Papel</th><th>Unidade</th><th>Sinal positivo =</th></tr>
+        <tr><td><code>e_lat</code></td><td>entrada</td><td>m</td><td>robô à direita da pista</td></tr>
+        <tr><td><code>theta_e</code></td><td>entrada</td><td>rad</td><td>apontando à esquerda</td></tr>
+        <tr><td><code>omega</code></td><td>saída</td><td>rad/s</td><td>guinada à esquerda</td></tr>
+      </table>
+      <p>5 termos linguísticos por variável: <b>AN, MN, Z, MP, AP</b><br>
+      Universo de discurso: [−50, 50]; região fina de operação: [−5, 5].</p>
+    </div>
+  </div>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>2</span></div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <h2>Artigo de referência e levantamento bibliográfico</h2>
+  <p><b>Artigo principal:</b> Mancilla, García-Valdez, Castillo &amp; Merelo-Guervós (2022). <i>Optimal Fuzzy
+  Controller Design for Autonomous Robot Path Tracking Using Population-Based Metaheuristics.</i>
+  Symmetry 14(2), 202. DOI 10.3390/sym14020202</p>
+  <ul>
+    <li><b>Bases consultadas:</b> Google Scholar, IEEE Xplore, MDPI, ScienceDirect/SpringerLink;</li>
+    <li><b>Palavras-chave:</b> "fuzzy logic controller" + "path tracking"; "fuzzy controller" + "genetic algorithm"; "genetic fuzzy systems";</li>
+    <li><b>Inclusão:</b> revisão por pares, estrutura fuzzy descrita (reprodutível), aplicação em robótica móvel ou fundamento; <b>Exclusão:</b> sem detalhe do modelo, fora de escopo (tipo-2, deep learning), sem acesso;</li>
+    <li><b>7 trabalhos relacionados</b> tabelados (Mamdani 1975; Takagi-Sugeno 1985; Zadeh 1965; Antonelli et al. 2007; Cordón et al. 2001; Precup &amp; Hellendoorn 2011) — ver <code>docs/trabalhos_relacionados.md</code>.</li>
+  </ul>
+  <p><b>Por que este artigo?</b> Reprodutível (modelo + pistas + controlador + fitness descritos),
+  recente e de acesso aberto, e une <span class="hl">controle fuzzy + computação evolutiva</span> — as duas frentes da disciplina.</p>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>3</span></div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <h2>Metodologia: simulação e função objetivo</h2>
+  <div class="cols">
+    <div class="col">
+      <h3>Modelo cinemático (Euler, Δt = 0,1 s)</h3>
+      <p><code>x⁺ = x + v·cosθ·Δt</code><br>
+         <code>y⁺ = y + v·sinθ·Δt</code><br>
+         <code>θ⁺ = θ + (v/L)·tanδ·Δt</code>,&nbsp; <code>δ = arctan(L·ω/v)</code>, |δ| ≤ 45°</p>
+      <h3>Pistas de referência</h3>
+      <ul>
+        <li>3 pistas (M, A, S) por <b>spline cúbica</b> sobre pontos de controle do artigo;</li>
+        <li>Ponto mais próximo via k-d tree → erros <code>e_lat</code> (produto vetorial) e <code>theta_e</code> (normalizado em [−π, π]).</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>Função objetivo (fitness)</h3>
+      <ul>
+        <li><b>RMSE do erro lateral</b>, média nas 3 pistas;</li>
+        <li>Término: chegada ao fim da pista (raio 2 m) ou T<sub>MAX</sub> = 50 s;</li>
+        <li>Penalidades: <b>+2000</b> se não completa o percurso; 5000 se a inferência falha;</li>
+        <li>→ a penalidade força o AG a só refinar controladores <i>válidos</i>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>4</span></div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <h2>Modelagem fuzzy: funções de pertinência</h2>
+  <div class="cols">
+    <div class="col">
+      <ul>
+        <li><b>Triangulares</b> no centro (Z, MN, MP) e <b>trapezoidais</b> nas pontas (AN, AP — ombros até ±50 garantem cobertura);</li>
+        <li>MFs das <b>entradas</b>: parametrizadas por <b>10 genes</b> p ∈ [0,1]¹⁰ (larguras, centros e rampas);</li>
+        <li>MFs da <b>saída</b>: fixas — preserva o significado físico da ação e reduz o espaço de busca;</li>
+        <li>Limites dos genes impedem degeneração (sem colapso de suporte nem sobreposição total).</li>
+      </ul>
+      <p>Fórmulas e tabelas completas: <code>docs/funcoes_de_pertinencia.md</code></p>
+    </div>
+    <div class="col">
+      <img src="../resultados/mfs_otimizadas.png" alt="MFs otimizadas">
+      <p style="font-size:9pt; text-align:center; color:#667">MFs após otimização pelo AG (erro angular, erro lateral e saída ω)</p>
+    </div>
+  </div>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>5</span></div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <h2>Base de regras: 25 regras (5×5), antissimétrica</h2>
+  <table>
+    <tr><th>theta_e \ e_lat</th><th>AN (muito à esq.)</th><th>MN</th><th>Z</th><th>MP</th><th>AP (muito à dir.)</th></tr>
+    <tr><td><b>AN</b> (apont. muito à dir.)</td><td>Z</td><td>MP</td><td>AP</td><td>AP</td><td>AP</td></tr>
+    <tr><td><b>MN</b></td><td>Z</td><td>MP</td><td>MP</td><td>MP</td><td>MP</td></tr>
+    <tr><td><b>Z</b> (alinhado)</td><td>AN</td><td>Z</td><td>Z</td><td>Z</td><td>AP</td></tr>
+    <tr><td><b>MP</b></td><td>MN</td><td>MN</td><td>MN</td><td>MN</td><td>Z</td></tr>
+    <tr><td><b>AP</b> (apont. muito à esq.)</td><td>AN</td><td>AN</td><td>AN</td><td>MN</td><td>Z</td></tr>
+  </table>
+  <div class="cols">
+    <div class="col">
+      <ul>
+        <li><b>Correção de rumo:</b> alinhado em posição, erro angular → ação oposta ao erro;</li>
+        <li><b>Retorno à pista:</b> alinhado mas afastado → guinada forte em direção à pista;</li>
+        <li><b>Zona morta:</b> desvios pequenos não geram ação (evita chattering);</li>
+      </ul>
+    </div>
+    <div class="col">
+      <ul>
+        <li><b>Convergência:</b> afastado mas já apontando de volta → ω = Z (evita sobressinal);</li>
+        <li><b>Conflito:</b> afastado e apontando para fora → correção máxima;</li>
+        <li>Estrutura <b>antissimétrica</b> = simetria física do problema.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>6</span></div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <h2>Inferência Mamdani e implementação</h2>
+  <div class="cols">
+    <div class="col">
+      <h3>Pipeline de inferência</h3>
+      <ul>
+        <li><b>Fuzzificação:</b> singleton nas duas entradas;</li>
+        <li><b>Operador E:</b> mínimo (t-norma);</li>
+        <li><b>Implicação:</b> mínimo (trunca o consequente);</li>
+        <li><b>Agregação:</b> máximo sobre as 25 regras;</li>
+        <li><b>Defuzzificação:</b> <span class="hl">centroide</span> do conjunto agregado.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>Arquitetura do código</h3>
+      <ul>
+        <li><code>FastFuzzyController</code>: motor Mamdani em NumPy (~1500× mais rápido) — usado no laço do AG;</li>
+        <li><code>build_fuzzy</code>: mesmo sistema em <b>scikit-fuzzy</b> — cenários, superfície e gráficos (validação cruzada);</li>
+        <li>AG real-coded: torneio k=3, cruzamento aritmético (0,7), mutação gaussiana (0,3; σ=0,2), elitismo 2;</li>
+        <li>5 execuções independentes, sementes 42–46 → <b>reprodutível</b>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>7</span></div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <h2>Cenários de teste (valores reais do sistema)</h2>
+  <table>
+    <tr><th>Caso</th><th>e_lat</th><th>theta_e</th><th>ω baseline</th><th>ω otimizado</th><th>Interpretação</th></tr>
+    <tr><td>Nulo</td><td>0</td><td>0</td><td>0,000</td><td>0,000</td><td>equilíbrio exato ✔</td></tr>
+    <tr><td>Lateral alto (dir.)</td><td>+5</td><td>0</td><td>+17,279</td><td>+17,032</td><td>vira à esquerda, de volta à pista ✔</td></tr>
+    <tr><td>Lateral alto (esq.)</td><td>−5</td><td>0</td><td>−17,279</td><td>−17,032</td><td>antissimétrico ✔</td></tr>
+    <tr><td>Angular alto</td><td>0</td><td>+2</td><td>−17,279</td><td>−17,271</td><td>corrige o rumo ✔</td></tr>
+    <tr><td>Aproximação (fronteiriço)</td><td>+5</td><td>+2</td><td>0,000</td><td>0,000</td><td>já convergindo → não interfere ✔</td></tr>
+    <tr><td>Conflito crítico</td><td>−5</td><td>+2</td><td>−17,279</td><td>−17,279</td><td>divergindo → ação máxima ✔</td></tr>
+  </table>
+  <p>|ω| = 17,3 corresponde ao centroide dos conjuntos AN/AP; na prática satura o esterçamento em ±45°.
+  Tabela completa com análise de coerência: <code>docs/cenarios_de_teste.md</code>.</p>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>8</span></div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <h2>Resultados: rastreamento e efeito do AG</h2>
+  <div class="cols">
+    <div class="col">
+      <table>
+        <tr><th>Pista</th><th>RMSE base (m)</th><th>RMSE otim. (m)</th><th>Δ</th></tr>
+        <tr><td>M</td><td>0,802</td><td>0,705</td><td>−12%</td></tr>
+        <tr><td>A</td><td>2,231</td><td>2,044</td><td>−8%</td></tr>
+        <tr><td>S</td><td>1,647</td><td>0,947</td><td>−42%</td></tr>
+        <tr><td><b>Média</b></td><td><b>1,560</b></td><td><b>1,232</b></td><td class="big">−21,0%</td></tr>
+      </table>
+      <ul>
+        <li>Robô <b>completa as 3 pistas</b> nos dois casos;</li>
+        <li>5 execuções do AG convergem para 1,23–1,32 m → robustez à semente.</li>
+      </ul>
+    </div>
+    <div class="col imgrow">
+      <img src="../resultados/optimized_trajectories.png" alt="Trajetórias otimizadas">
+      <img src="../resultados/ag_convergence.png" alt="Convergência do AG" style="max-height:42mm">
+    </div>
+  </div>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>9</span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <h2>Análise crítica (1): defeito encontrado e corrigido</h2>
+  <div class="warn">
+    <p><b>Versão inicial:</b> matriz de regras <b>espelhada</b> no eixo do erro lateral em relação à convenção
+    de sinal do simulador → realimentação lateral <i>positiva</i>: o robô seguia a pista por alguns metros e
+    <b>divergia</b> (RMSE ≈ 2085 m, com penalidade). Segundo problema: sem critério de chegada, o robô
+    completava a pista em ~14 s e vagava até os 50 s, disparando a penalidade mesmo rastreando bem.</p>
+  </div>
+  <div class="ok">
+    <p><b>Correções validadas:</b> espelhamento das colunas da matriz + detecção de chegada.
+    RMSE baseline: 2085 → <b>1,56 m</b>; melhoria do AG: 0,5% → <b>21,0%</b>.</p>
+  </div>
+  <ul>
+    <li><b>Lição 1:</b> convenções de sinal são parte da modelagem fuzzy — documentamos todas (<code>docs/base_de_regras.md</code>);</li>
+    <li><b>Lição 2:</b> validação de <b>malha fechada</b> é indispensável: cenários pontuais isolados não revelavam o problema;</li>
+    <li><b>Lição 3:</b> a penalidade de não-chegada na fitness detecta corretamente controladores inválidos.</li>
+  </ul>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>10</span></div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <h2>Análise crítica (2): limites, sensibilidade e Mamdani × TSK</h2>
+  <div class="cols">
+    <div class="col">
+      <h3>Onde funciona bem / onde sofre</h3>
+      <ul>
+        <li>Retas e curvas suaves: erro &lt; 1 m, captura sem oscilação;</li>
+        <li>Curvas fechadas: laços de recaptura (v fixa, sem antecipação de curvatura) — pior caso: pista A;</li>
+      </ul>
+      <h3>Parâmetros sensíveis</h3>
+      <ul>
+        <li>Zona morta lateral: estreita → chattering; larga → erro de regime;</li>
+        <li>Ombro AN/AP angular: AG o reduziu (1,25→0,79) e compensou alargando a zona morta angular (0,5→0,83).</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>Mamdani × TSK (conceitual)</h3>
+      <ul>
+        <li><b>TSK</b>: saída mais suave e contínua, ajuste mais fácil (consequentes lineares), menor custo;</li>
+        <li><b>Mamdani</b>: saída também linguística → base auditável — adequado a um trabalho de reprodução interpretável;</li>
+      </ul>
+      <h3>Melhorias futuras</h3>
+      <ul>
+        <li>3ª entrada: curvatura da pista (antecipação); velocidade variável;</li>
+        <li>Otimizar MFs de saída; comparar AG × PSO × Mamdani × TSK.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>11</span></div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <h2>Conclusão, IA e referências</h2>
+  <ul>
+    <li>Reprodução mínima viável <b>funcional e reprodutível</b> do controlador de Mancilla et al. (2022): Mamdani 5×5, 25 regras, centroide;</li>
+    <li>AG real-coded reduziu o RMSE médio de <b>1,56 m → 1,23 m (−21%)</b> ajustando só as MFs de entrada;</li>
+    <li>Ciclo completo: modelagem justificada → implementação → validação experimental → análise crítica honesta.</li>
+  </ul>
+  <h3>Uso de IA (declarado)</h3>
+  <p style="font-size:10.5pt">Claude Code (Anthropic): esboço de código, revisão/depuração (identificou os 2 defeitos, validados pela equipe por simulação) e rascunhos de documentação. Tudo revisado, executado e validado pelos integrantes — <code>docs/declaracao_uso_ia.md</code>.</p>
+  <h3>Referências principais</h3>
+  <p style="font-size:9.5pt">[1] Mancilla et al., Symmetry 14(2):202, 2022 · [2] Antonelli et al., IEEE TFS 15(2), 2007 · [3] Mamdani &amp; Assilian, IJMMS 7(1), 1975 · [4] Takagi &amp; Sugeno, IEEE SMC-15(1), 1985 · [5] Cordón et al., Genetic Fuzzy Systems, 2001 · [6] Precup &amp; Hellendoorn, Comput. Ind. 62(3), 2011 · [7] Zadeh, Inf. &amp; Control 8(3), 1965</p>
+  <p style="margin-top:4mm"><b>github.com/brenda24070071-dotcom/fuzzy-ag-path-tracking-cesupa</b> — Obrigado!</p>
+  <div class="foot"><span>Fuzzy Mamdani + AG — CESUPA 0700M8</span><span>12</span></div>
+</section>
+
+</body>
+</html>

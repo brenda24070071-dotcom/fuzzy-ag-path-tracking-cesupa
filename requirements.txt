@@ -1,0 +1,10 @@
+# Dependencias do projeto (testado em Python 3.10+ / 3.14)
+# Instalacao: pip install -r requirements.txt
+numpy>=1.26
+scipy>=1.11
+matplotlib>=3.8
+scikit-fuzzy>=0.5.0
+networkx>=3.0
+
+# Versoes exatas usadas na validacao final (junho/2026):
+# numpy==2.4.6 | scipy==1.17.1 | matplotlib==3.10.9 | scikit-fuzzy==0.5.0 | networkx==3.6.1

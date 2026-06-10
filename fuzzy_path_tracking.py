@@ -35,7 +35,7 @@ class Track:
 
     def closest(self, x, y):
         _, idx = self.tree.query([x, y])
-        return self.rx[idx], self.ry[idx], self.rdx[idx], self.rdy[idx]
+        return self.rx[idx], self.ry[idx], self.rdx[idx], self.rdy[idx], idx
 
 TRACKS = [
     Track("M", [0,6,12,5,7.5,3,-1],   [0,0,5,6.5,3,5,-2]),
@@ -44,12 +44,16 @@ TRACKS = [
 ]
 
 LABELS = ['AN','MN','Z','MP','AP']
+# Convencao de sinais (ver docs/base_de_regras.md):
+#   e_lat   > 0 -> robo a DIREITA da trajetoria;  theta_e > 0 -> apontando a ESQUERDA.
+#   omega   > 0 -> guinada anti-horaria (vira a esquerda).
+# Linhas = theta_e (AN..AP); colunas = e_lat (AN..AP); valor = indice da MF de omega.
 RULE_MATRIX = [
-    [4, 4, 4, 3, 2],  # theta_e = AN (AP, AP, AP, MP, Z)
-    [3, 3, 3, 3, 2],  # theta_e = MN (MP, MP, MP, MP, Z)
-    [4, 2, 2, 2, 0],  # theta_e = Z  (AP, Z, Z, Z, AN)
-    [2, 1, 1, 1, 1],  # theta_e = MP (Z, MN, MN, MN, MN)
-    [2, 1, 0, 0, 0],  # theta_e = AP (Z, MN, AN, AN, AN)
+    [2, 3, 4, 4, 4],  # theta_e = AN (Z, MP, AP, AP, AP)
+    [2, 3, 3, 3, 3],  # theta_e = MN (Z, MP, MP, MP, MP)
+    [0, 2, 2, 2, 4],  # theta_e = Z  (AN, Z, Z, Z, AP)
+    [1, 1, 1, 1, 2],  # theta_e = MP (MN, MN, MN, MN, Z)
+    [0, 0, 0, 1, 2],  # theta_e = AP (AN, AN, AN, MN, Z)
 ]
 
 # --- Construcao do controlador Fuzzy (skfuzzy) ---
@@ -85,10 +89,9 @@ def build_fuzzy(params):
     om['AP'] = fuzz.trapmf(univ, [0.5,1,5,50])
 
     rules = []
-    str_rules = [['AN','MN','Z','MP','AP'][idx] for idx in range(5)]
     for r, te_label in enumerate(LABELS):
         for col, er_label in enumerate(LABELS):
-            om_label = str_rules[RULE_MATRIX[r][col]]
+            om_label = LABELS[RULE_MATRIX[r][col]]
             rules.append(ctrl.Rule(te[te_label] & er[er_label], om[om_label]))
 
     sim = ctrl.ControlSystemSimulation(ctrl.ControlSystem(rules))
@@ -162,13 +165,17 @@ class FastFuzzyController:
 
 # --- Simulacao cinematica (Euler discreto) usando FastFuzzy ---
 def simulate(controller, track):
+    """Simula ate o robo alcancar o fim da pista ou estourar T_MAX.
+    Penaliza em +2000 controladores que nao completam o percurso."""
     xr, yr, th = 0.0, 0.0, 0.0
     hx, hy, ssq = [], [], 0.0
     steps = int(T_MAX / DT)
+    last_idx = len(track.rx) - 1
+    n_exec, reached = 0, False
 
     for _ in range(steps):
         hx.append(xr); hy.append(yr)
-        rx, ry, rdx, rdy = track.closest(xr, yr)
+        rx, ry, rdx, rdy, idx = track.closest(xr, yr)
 
         n = np.hypot(rdx, rdy) + 1e-6
         e_lat = (xr-rx)*rdy/n - (yr-ry)*rdx/n
@@ -184,9 +191,15 @@ def simulate(controller, track):
         yr += V_R * np.sin(th) * DT
         th += (V_R/L) * np.tan(delta) * DT
         ssq += e_lat**2
+        n_exec += 1
 
-    rmse = np.sqrt(ssq / steps)
-    if np.hypot(xr - track.rx[-1], yr - track.ry[-1]) > 5.0:
+        # criterio de chegada: abeam dos ultimos pontos da pista e perto do fim
+        if idx >= last_idx - 2 and np.hypot(xr - track.rx[-1], yr - track.ry[-1]) < 2.0:
+            reached = True
+            break
+
+    rmse = np.sqrt(ssq / n_exec)
+    if not reached:
         rmse += 2000.0
     return rmse, hx, hy
 
@@ -232,12 +245,12 @@ def run_ga(pop_size=30, gens=20, pc=0.7, pm=0.3, sigma=0.2):
 # --- Avaliacao pontual do controlador (6 cenarios) via Skfuzzy ---
 def eval_scenarios(fsim, label):
     scenarios = [
-        (0.0, 0.0, "Centro, alinhado"),
-        (5.0, 0.0, "Direita, alinhado"),
-        (-5.0, 0.0, "Esquerda, alinhado"),
-        (0.0, 2.0, "Centro, apontando direita"),
-        (5.0, 2.0, "Direita + apontando direita (conflito)"),
-        (-5.0, 2.0, "Esquerda, apontando centro (aproximacao)"),
+        (0.0, 0.0, "Centro, alinhado (caso nulo)"),
+        (5.0, 0.0, "Direita, alinhado (erro lateral alto)"),
+        (-5.0, 0.0, "Esquerda, alinhado (erro lateral alto)"),
+        (0.0, 2.0, "Centro, apontando a esquerda (erro angular alto)"),
+        (5.0, 2.0, "Direita, apontando a esquerda (aproximacao)"),
+        (-5.0, 2.0, "Esquerda, apontando a esquerda (conflito critico)"),
     ]
     print(f"\n  {'Cenario':<50} | {label+' (omega)':>20}")
     print("  " + "-"*75)
