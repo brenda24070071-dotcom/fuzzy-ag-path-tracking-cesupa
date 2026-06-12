@@ -14,7 +14,10 @@ from skfuzzy import control as ctrl
 import os
 import time
 
-os.makedirs("resultados", exist_ok=True)
+# Diretorio de saida ancorado na pasta do script (funciona de qualquer CWD)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+RESULTS_DIR = os.path.join(BASE_DIR, "resultados")
+os.makedirs(RESULTS_DIR, exist_ok=True)
 
 # --- Parametros do modelo cinematico (Tabela 6 do artigo) ---
 L = 2.5            # wheelbase
@@ -273,7 +276,7 @@ def plot_tracks_fast(controller, title, filename, color='b', label_rob='Robo'):
         ax.set_title(f"Pista {track.name} (RMSE: {rmse:.3f})")
         ax.legend(); ax.set_aspect('equal'); ax.grid(True, alpha=0.3)
     fig.suptitle(title, fontsize=14); fig.tight_layout()
-    fig.savefig(f"resultados/{filename}", dpi=150); plt.close(fig)
+    fig.savefig(os.path.join(RESULTS_DIR, filename), dpi=150); plt.close(fig)
 
 def plot_convergence(histories):
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -281,7 +284,7 @@ def plot_convergence(histories):
         ax.plot(h, marker='o', ms=3, label=f"Exec {i+1}")
     ax.set(title="Curvas de Convergencia do AG", xlabel="Geracao", ylabel="Melhor RMSE")
     ax.legend(); ax.grid(True, alpha=0.3)
-    fig.tight_layout(); fig.savefig("resultados/ag_convergence.png", dpi=150); plt.close(fig)
+    fig.tight_layout(); fig.savefig(os.path.join(RESULTS_DIR, "ag_convergence.png"), dpi=150); plt.close(fig)
 
 def plot_mfs(te, er, om):
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
@@ -290,7 +293,7 @@ def plot_mfs(te, er, om):
             ax.plot(var.universe, var[label].mf, label=label)
         ax.set_title(name); ax.legend(); ax.grid(True, alpha=0.3)
     fig.suptitle("Funcoes de Pertinencia Otimizadas"); fig.tight_layout()
-    fig.savefig("resultados/mfs_otimizadas.png", dpi=150); plt.close(fig)
+    fig.savefig(os.path.join(RESULTS_DIR, "mfs_otimizadas.png"), dpi=150); plt.close(fig)
 
 def plot_surface(fsim):
     """Superficie de controle omega = f(err, theta_e) via skfuzzy."""
@@ -310,7 +313,7 @@ def plot_surface(fsim):
     cs = ax.contourf(e_range, t_range, Z, levels=20, cmap='RdBu_r')
     fig.colorbar(cs, ax=ax, label='omega')
     ax.set(title="Superficie de Controle", xlabel="Erro Lateral (e)", ylabel="Erro Angular (theta_e)")
-    fig.tight_layout(); fig.savefig("resultados/superficie_controle.png", dpi=150); plt.close(fig)
+    fig.tight_layout(); fig.savefig(os.path.join(RESULTS_DIR, "superficie_controle.png"), dpi=150); plt.close(fig)
 
 # === MAIN ===
 def main():
@@ -366,7 +369,7 @@ def main():
     print(f"  Otimizado RMSE:  {best_fit:.4f}")
     print(f"  Melhoria:        {(1 - best_fit/base_rmse)*100:.1f}%")
     print(f"  Tempo total:     {(time.time()-t_start)/60:.2f} min")
-    print(f"\nGraficos salvos em ./resultados/")
+    print(f"\nGraficos salvos em {RESULTS_DIR}")
 
 if __name__ == "__main__":
     main()
