@@ -1,8 +1,8 @@
 # Controlador Fuzzy Mamdani + AG para Rastreamento de Trajetória
 
 > **Disciplina:** Inteligência Artificial e Computacional (0700M8) — CESUPA · Prof. Daniel Leal Souza
-> **Turma:** `<PREENCHER: CC5MA ou CC5NA>`
-> **Equipe:** `<PREENCHER: nomes completos dos integrantes>`
+> **Turma:** CC5MA
+> **Equipe:** Augusto Pereira Rodrigues, Brenda dos Santos Nascimento, Caue Jadão Barroso, César Augusto Borges Ribeiro, Fernando César Mourão Fonseca
 > **Modalidade:** Opção A (artigo científico) — trilha **A1: Reprodução**, com extensão opcional de **otimização por Algoritmo Genético** (pontuação extra, opção 2)
 
 Sistema de controle **Fuzzy Mamdani** que comanda a guinada de um robô autônomo (modelo
