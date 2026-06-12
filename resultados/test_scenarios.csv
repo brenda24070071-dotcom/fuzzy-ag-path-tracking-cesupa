@@ -1,0 +1,9 @@
+categoria,erro_lateral_e,erro_angular_theta_e,omega,classificacao,sentido_volante,descricao,coerencia
+Baixo,0.0,0.0,0.0,Manter reto,neutro,Veiculo centrado e alinhado (regime nominal),COERENTE: sem erro -> acao ~0 (deadband)
+Medio,1.5,0.5,0.7182,Correcao moderada,esquerda (+),"Desvio lateral moderado a direita, leve angulo",COERENTE: acao de correcao acionada
+Alto,8.0,0.0,1.3545,Correcao forte,esquerda (+),Desvio lateral severo a direita (saturacao),COERENTE: acao de correcao acionada
+Fronteirico,0.2,0.05,0.6603,Correcao moderada,esquerda (+),"Erros minimos, dentro do nucleo do conjunto Zero",COERENTE: resposta suave perto de zero
+Conflitante,5.0,2.0,0.0,Manter reto,neutro,A direita da rota MAS ja apontando de volta,"COERENTE: conflito arbitrado (acao amortecida, anti-overshoot)"
+Conflitante,-5.0,-2.0,0.0,Manter reto,neutro,A esquerda da rota MAS ja apontando de volta (espelho),"COERENTE: conflito arbitrado (acao amortecida, anti-overshoot)"
+Critico,-8.0,3.0,-1.3545,Correcao forte,direita (-),Extremo: muito a esquerda e divergindo,COERENTE: acao de correcao acionada
+Critico,8.0,-3.0,1.3545,Correcao forte,esquerda (+),Extremo: muito a direita e divergindo (espelho),COERENTE: acao de correcao acionada

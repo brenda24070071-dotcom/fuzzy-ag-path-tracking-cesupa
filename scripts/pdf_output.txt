@@ -1,0 +1,174 @@
+/gid00030/gid00035/gid00032/gid00030/gid00038/gid00001/gid00033/gid00042/gid00045 /gid00001
+/gid00048/gid00043/gid00031/gid00028/gid00047/gid00032/gid00046Citation: Mancilla, A.; García-Valdez,
+M.; Castillo, O.; Merelo-Guervós, J.J.
+Optimal Fuzzy Controller Design for
+Autonomous Robot Path Tracking
+Using Population-Based
+Metaheuristics. Symmetry 2022 ,14,
+202. https://doi.org/10.3390/
+sym14020202
+Academic Editor: Cengız
+Kahraman
+Received: 16 December 2021
+Accepted: 18 January 2022
+Published: 21 January 2022
+Publisher’s Note: MDPI stays neutral
+with regard to jurisdictional claims in
+published maps and institutional afﬁl-
+iations.
+Correction Statement: This article
+has been republished with a minor
+change. The change does not affect
+the scientiﬁc content of the article and
+further details are available within
+the backmatter of the website version
+of this article.
+Copyright: © 2022 by the authors.
+Licensee MDPI, Basel, Switzerland.
+This article is an open access article
+distributed under the terms and
+conditions of the Creative Commons
+Attribution (CC BY) license (https://
+creativecommons.org/licenses/by/
+4.0/).
+symmetrySS
+Article
+Optimal Fuzzy Controller Design for Autonomous Robot Path
+Tracking Using Population-Based Metaheuristics†
+Alejandra Mancilla1
+, Mario García-Valdez1,*
+, Oscar Castillo1
+and Juan Julian Merelo-Guervós2
+1Division of Graduate Studies and Research, Tijuana Institute of Technology, Tijuana 22414, Mexico;
+alejandra.mancilla@tectijuana.edu.mx (A.M.); ocastillo@tectijuana.mx (O.C.)
+2Department of Computer Architecture and Computer Technology, University of Granada,
+16741 Granada, Spain; jmerelo@ugr.es
+*Correspondence: mario@tectijuana.edu.mx; Tel.: +52-664-123-7806
+† This paper is an extended version of our paper published in INFUS-21, Izmir, Turkey, 24–26 August 2021.
+Abstract: In this work, we propose, through the use of population-based metaheuristics, an opti-
+mization method that solves the problem of autonomous path tracking using a rear-wheel fuzzy logic
+controller. This approach enables the design of controllers using rules that are linguistically familiar to
+human users. Moreover, a new technique that uses three different paths to validate the performance
+of each candidate conﬁguration is presented. We extend on our previous work by adding two more
+membership functions to the previous fuzzy model, intending to have a ﬁner-grained adjustment.
+We tuned the controller using several well-known metaheuristic methods, Genetic Algorithms (GA),
+Particle Swarm Optimization (PSO), Grey Wolf Optimizer (GWO), Harmony Search (HS), and the
+recent Aquila Optimizer (AO) and Arithmetic Optimization Algorithms. Experiments validate that,
+compared to published results, the proposed fuzzy controllers have better RMSE-measured perfor-
+mance. Nevertheless, experiments also highlight problems with the common practice of evaluating
+the performance of fuzzy controllers with a single problem case and performance metric, resulting in
+controllers that tend to be overtrained.
+Keywords: fuzzy systems; fuzzy control; bioinspired algorithms
+1. Introduction
+Proposed by Lofti Zadeh [ 1], fuzzy logic introduces the concepts of fuzzy sets and
+fuzzy logic operators [ 2]. Contrary to Boolean logic, in which an element is a member of
+a set or is not, elements have a degree of membership to many sets in fuzzy logic. Fuzzy
+logic uses so-called membership functions (MFs) to assign a numerical value to each set
+member, indicating their degree of membership. We must deﬁne MFs for each linguistic
+variable. These variables can be used in a rule-based system to express knowledge similarly
+to natural language. For instance, the rule “if distance is near” uses the linguistic variable
+distance, with a fuzzy MF assigning a degree of membership to the set near to each element
+of the distance domain; for instance, for 2 mm and 50 mm, the function will assign the
+following degrees of membership: near (2) = 0.92 and near (50) = 0.40. These rule-based
+systems can express complex relationships well suited for control applications.
+That is why, since the earlier years of fuzzy logic theory, fuzzy inference systems [ 3]
+have been applied to control problems [ 3–6], in many research projects [ 7,8] and commer-
+cial systems.
+Many papers address the problem of path tracking control with fuzzy logic, the
+earlier works used simple fuzzy rules to make adjustments to linear controllers [ 9], or
+integrated fuzzy logic to a complex adaptive controller [ 10]. Meng [ 11] proposes a Fuzzy
+PID (proportional integral derivative) Controller algorithm to a two-degree-of-freedom
+arm robot. Antonelli et al. [ 12] propose a set of rules to emulate the way humans drive,
+using as inputs of curve and distance to the system. We have also reviewed works where
+authors use controllers for the follow-up and planning of routes. For example, using a
+Symmetry 2022 ,14, 202. https://doi.org/10.3390/sym14020202 https://www.mdpi.com/journal/symmetrySymmetry 2022 ,14, 202 2 of 17
+simpliﬁed kinematic model of the bicycle type using the control law for the navigation and
+follow-up of a path [ 13], in work presented by Beleño et al. [ 14] they propose the planning
+and tracking of the trajectories of a land vehicle based on the steering control in a natural
+environment. Guerrero-Castellanos et al. [ 15] addresses the path following problem for the
+robot (3, 0) based on its kinematic model and proposes a solution by designing a control
+strategy that mainly considers the maximum permitted levels of the control signal.
+An essential caveat of applying fuzzy control strategies to real-world problems is that
+we require optimization or adaptive techniques to tune some aspects of the fuzzy inference
+system. From the membership functions (MFs) that deﬁne the linguistic variables to the
+deﬁnition of a rule-based system, including a defuzziﬁcation method [16,17].
+Tuning is needed because the fuzzy controllers’ performance is highly dependent on
+the parameters of the fuzzy system used. Moreover, the option of making a manual selection
+of these parameters is difﬁcult because the search space is of considerable size and requires
+the validation of establishing the controller’s performance by running time-consuming
+simulations. Evolutionary Algorithms (EAs) and other population-based metaheuristics
+are often employed in tuning Fuzzy Inference Systems (FISs) [18,19].
+Population-based metaheuristics are stochastic techniques that search for optimal
+solutions using two strategies: exploration and exploitation. Exploration searches the space
+globally, avoiding to be trapped in a local optimum, while exploitation searches locally for
+nearby promising solutions. Genetic Algorithms (GAs) are the canonical representatives
+of population-based metaheuristics [ 20]. GAs work on a set of potential solutions called a
+population that is evolved for a certain number of generations until a suitable or optimal
+solution is found [ 21]. In each generation, potential solutions (individuals) are evaluated,
+and then surviving individuals reproduce through genetic crossover (exploration) and
+mutation operators (exploitation) to generate new offspring. Finally, there is a replacement
+mechanism to select the most adapted offspring and generate a new generation of the
+population. Most population-based metaheuristics, create an initial set of random candidate
+solutions. These candidates are evaluated against a quality function, then taking the
+quality and the position or structure of each solution in consideration, a nature-inspired
+metaheuristic is applied to generate a new set of candidates.
+Population-based metaheuristics have been extensively used for structural optimiza-
+tion tasks [ 22–25], together with more traditional gradient-based algorithms. These nature-
+inspired metaheuristics can be broadly grouped into evolutionary algorithms (EAs) [ 26]
+and swarm intelligence (SI) [ 27], as well as other categories; popular EAs are Genetic
+Algorithms (GAs) [ 28,29], Genetic Programming (GP) [ 26], and Differential Evolution
+(DE) [ 30], while examples of (SI) [ 27] are particle swarm optimization (PSO), [ 31], Grey
+Wolf Optimization (GWO) [ 32], and Aquila Optimizer (AO) [ 33]. Moreover, examples of
+other categories are the Harmony Search (HS) [ 34] algorithm, which is inspired by how
+jazz musicians improvise when playing with others, and ﬁnally, the arithmetic optimiza-
+tion algorithm (AOA) [ 35], inspired by the distribution behavior of the main arithmetic
+operators in mathematics.
+We have found in the literature various studies that optimize the parameters of
+a fuzzy controller applied to mobile autonomous robots using different bio-inspired
+metaheuristics [ 36,37]. Wagner and Hagras [ 38] propose a GA to evolve the architec-
+ture of a type-2 fuzzy controller in robot navigation for real environments; they optimize
+the standard deviation of Gaussian type-2 MFs. Again a GA is presented by Wu and Wan
+Tan [ 39] for evolving the parameters of all the MFs of a coupled-tank liquid-level control
+system. Astudillo et al. [ 40] propose a new metaheuristic based on chemical reactions
+to tune the parameters of a fuzzy controller for a uni-cycle robot. There is also work
+focused on the metaheuristic optimization of fuzzy type-2 controllers, the main works are
+reviewed by Castillo [ 41], and the main reason for using this type of controller is to model
+the uncertainty of the sensor data or the fuzzy model itself. We have observed that most of
+these studies optimize the parameters of MFs directly. For instance, if we have a triangular
+function for a fuzzy set A, deﬁned by a lower limit a, and upper limit of band a value m
+where a<m<basSymmetry 2022 ,14, 202 3 of 17
+mtrian(x) =8
+>>>><
+>>>>:0, xa
+x a
+m a,a<xm
+b x
+b m,m<xb
+0, xb, (1)
+each value is optimized independently, sometimes validating only the restriction a<m<b.
+This approach has the advantage of not limiting the search because candidate solutions can
+represent all possible MFs.
+In this work, we propose a novel method that adds further restrictions, including a
+symmetric deﬁnition and limiting the range of values of each parameter. To achieve that,
+we ﬁrst designed the structure of a parameterizable fuzzy controller, using ﬁve member-
+ship functions for each fuzzy input variable. In our previous work [ 42,43], we compared
+symmetrical and asymmetrical deﬁnitions and found that symmetrical restrictions give
+better results for rear-wheel-based controllers. We propose a new parameterization tech-
+nique that enables symmetric MFs’ deﬁnition by using an aperture factor instead of the
+previous method that used a delta from a ﬁxed point. Moreover, in this work, we also
+propose a change on how candidate controllers are typically evaluated by other works in
+the literature by using a single simulation and path as the ﬁtness function. As experiments
+show, in the case of rear-wheel path tracking, evaluating candidate solutions with three
+simulations, gives better results. As experiments show, these additions greatly improve the
+controller’s optimal design by signiﬁcantly decreasing the tracking error (RMSE) compared
+to our previous work. Experimental results also show that this method reduces the risk of
+generating an over-trained controller with low error for a speciﬁc path but cannot function
+in other paths.
+To demonstrate the application of the method, we report an experimental case study
+using a bicycle-like mobile robot with nonholonomic constraints. In this work, we choose
+the problem of trajectory tracking since it has the particularity of being naturally symmetric
+since the error is measured by moving away either to the left or right of the desired path.
+Furthermore, in the literature, we have not found applications of fuzzy systems to follow
+the trajectory of a path so that this research could solve similar problems.
+The main contribution of this work is to propose an optimization method to solve
+the problem of autonomous path tracking us

@@ -1,0 +1,82 @@
+============================================================
+OTIMIZACAO EVOLUTIVA (AG) - 5 execucoes independentes
+============================================================
+
+--- Execucao 1/5 (seed=42) ---
+  Gen 0 | Best: 1.6472
+  Gen 1 | Best: 1.6472 | Mean: 761.8960
+  Gen 2 | Best: 1.6472 | Mean: 758.3418
+  Gen 3 | Best: 1.6472 | Mean: 8.5902
+  Gen 4 | Best: 1.6170 | Mean: 506.6058
+  Gen 5 | Best: 1.6170 | Mean: 511.6350
+  Gen 6 | Best: 1.5877 | Mean: 258.6703
+  Gen 7 | Best: 1.5338 | Mean: 256.6310
+  Gen 8 | Best: 1.5338 | Mean: 6.6589
+  Gen 9 | Best: 1.5338 | Mean: 508.1852
+  Gen 10 | Best: 1.4861 | Mean: 504.7564
+
+--- Execucao 2/5 (seed=43) ---
+  Gen 0 | Best: 1.7049
+  Gen 1 | Best: 1.7049 | Mean: 1516.5513
+  Gen 2 | Best: 1.6806 | Mean: 431.9473
+  Gen 3 | Best: 1.5601 | Mean: 8.4643
+  Gen 4 | Best: 1.5593 | Mean: 504.9343
+  Gen 5 | Best: 1.5169 | Mean: 5.1086
+  Gen 6 | Best: 1.4948 | Mean: 10.0637
+  Gen 7 | Best: 1.4948 | Mean: 758.1359
+  Gen 8 | Best: 1.4948 | Mean: 504.8376
+  Gen 9 | Best: 1.4886 | Mean: 508.1049
+  Gen 10 | Best: 1.4886 | Mean: 6.6657
+
+--- Execucao 3/5 (seed=44) ---
+  Gen 0 | Best: 1.9510
+  Gen 1 | Best: 1.7113 | Mean: 258.5535
+  Gen 2 | Best: 1.7113 | Mean: 505.0860
+  Gen 3 | Best: 1.5771 | Mean: 6.8624
+  Gen 4 | Best: 1.5771 | Mean: 258.3545
+  Gen 5 | Best: 1.5771 | Mean: 6.7575
+  Gen 6 | Best: 1.4905 | Mean: 258.2904
+  Gen 7 | Best: 1.4905 | Mean: 14.9632
+  Gen 8 | Best: 1.4905 | Mean: 9.9747
+  Gen 9 | Best: 1.4701 | Mean: 253.1915
+  Gen 10 | Best: 1.4701 | Mean: 516.4401
+
+--- Execucao 4/5 (seed=45) ---
+  Gen 0 | Best: 1.6580
+  Gen 1 | Best: 1.6580 | Mean: 760.2430
+  Gen 2 | Best: 1.5549 | Mean: 513.4321
+  Gen 3 | Best: 1.5549 | Mean: 511.7073
+  Gen 4 | Best: 1.5549 | Mean: 1006.4187
+  Gen 5 | Best: 1.5216 | Mean: 259.9460
+  Gen 6 | Best: 1.5216 | Mean: 509.9563
+  Gen 7 | Best: 1.5216 | Mean: 501.4663
+  Gen 8 | Best: 1.5127 | Mean: 504.8230
+  Gen 9 | Best: 1.5127 | Mean: 509.9959
+  Gen 10 | Best: 1.5003 | Mean: 251.5604
+
+--- Execucao 5/5 (seed=46) ---
+  Gen 0 | Best: 1.8046
+  Gen 1 | Best: 1.5824 | Mean: 1174.8543
+  Gen 2 | Best: 1.5780 | Mean: 1253.0981
+  Gen 3 | Best: 1.5630 | Mean: 753.1300
+  Gen 4 | Best: 1.5405 | Mean: 836.3990
+  Gen 5 | Best: 1.5321 | Mean: 1253.0105
+  Gen 6 | Best: 1.5321 | Mean: 1008.0427
+  Gen 7 | Best: 1.5321 | Mean: 674.8093
+  Gen 8 | Best: 1.5207 | Mean: 1002.9820
+  Gen 9 | Best: 1.5207 | Mean: 1007.9396
+  Gen 10 | Best: 1.5207 | Mean: 501.4434
+
+  Melhor RMSE global: 1.4701
+  Parametros salvos em resultados/best_params.npy
+
+  Baseline RMSE:  1.9283
+  Otimizado RMSE: 1.4701
+  Melhoria:       23.8%
+[experiments] Controlador: Otimizado (AG)
+[experiments] CSV  -> resultados\test_scenarios.csv
+[experiments] PNG  -> resultados\funcoes_pertinencia.png
+[experiments] MD   -> resultados\analise_experimentos.md
+[experiments] Veredito global: COERENTE (4/4 checagens)
+
+Concluido. Veja a pasta ./resultados/

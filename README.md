@@ -61,6 +61,31 @@ exatamente. Guia completo (incluindo solução de problemas):
 [docs/manual_de_execucao.md](docs/manual_de_execucao.md). Tabela de cenários com
 interpretação e análise: [docs/cenarios_de_teste.md](docs/cenarios_de_teste.md).
 
+## Análise Experimental Ampliada (equipe de 5 integrantes)
+
+Cumprindo a **ampliação obrigatória** para equipes de 5 integrantes (Lauda Parte 2,
+Seção 5 — trilha *Análise experimental ampliada*), o repositório inclui um estudo de
+**sensibilidade/ablação** dos hiperparâmetros do AG. O estudo **não altera** o sistema
+fuzzy nem o AG: importa `fuzzy_path_tracking.py` e reutiliza `run_ga()` e `fitness()`.
+
+```bash
+python scripts/analise_experimental_ampliada.py --full     # análise completa (~4 min, 5 sementes)
+python scripts/analise_experimental_ampliada.py --quick    # teste rápido (~2 min, 3 sementes)
+```
+
+- **Método:** One-Factor-At-A-Time (OFAT) — varia 1 parâmetro por vez em 3 níveis
+  (baixo/baseline/alto), demais fixos no baseline.
+- **4 parâmetros variados:** `population_size`, `n_generations`, `mutation_rate` (taxa
+  de mutação por gene) e `crossover_rate`.
+- **Sementes:** 5 execuções independentes por configuração (42–46), pois o AG é estocástico.
+- **Métricas:** qualidade (melhor/médio/pior fitness = RMSE médio), estabilidade
+  (desvio-padrão entre sementes), convergência (gerações até estabilizar) e custo
+  (tempo e nº de avaliações da função objetivo = `pop_size × (gens+1)`).
+- **Resultados:** `resultados/analise_experimental_ampliada/` (CSVs + 3 gráficos +
+  tabela e resumo interpretativo). Discussão pronta para o relatório em
+  [docs/analise_experimental_ampliada.md](docs/analise_experimental_ampliada.md);
+  respostas de arguição em [docs/arguicao_analise_experimental.md](docs/arguicao_analise_experimental.md).
+
 ## Estrutura do repositório
 
 ```
